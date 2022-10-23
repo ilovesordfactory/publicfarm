@@ -305,8 +305,7 @@ end)
     Auto Drop Check Enchant
     This is for keeping Chestfinder+ swords.
 ]]--
-
---[[ GET CHEST FUNCTION ( THIS WILL BE LONG LIKE MY MASSIVE SCHLONG]]--
+_G.autoswing = false
 function Chestfinder(a)
     if st.keepchest then
         for i,v in pairs(a:GetChildren()) do 
@@ -653,15 +652,8 @@ spawn(function()
                         m = ClosestMob(mobs)
                         repeat wait()
                             if m:FindFirstChild("HumanoidRootPart") then 
+                                _G.autoswing = true
                                 Tween(m:FindFirstChild("HumanoidRootPart"),0,1,-2)
-                                if char:FindFirstChild("Sword") then 
-                                    char:FindFirstChild("Sword"):Activate()
-                                    if char:FindFirstChild("Sword").Config.ITEMID.Value ~= st.farmid then 
-                                        AutoEquip(true,false)
-                                    end 
-                                else 
-                                    AutoEquip(true,false)
-                                end
                                 if m:FindFirstChild("Humanoid") == nil or m:FindFirstChild("Humanoid").Health == 0 then m:Destroy() end
                             else nohumanoidrootpart = true
                             end
@@ -691,14 +683,7 @@ spawn(function()
                                             end 
                                         else 
                                         end
-                                        if char:FindFirstChild("Sword") then  -- if character has a swrord
-                                            char:FindFirstChild("Sword"):Activate() -- then attack
-                                            if char:FindFirstChild("Sword").Config.ITEMID.Value ~= st.farmid then  -- if char is holding wrong sword then 
-                                                AutoEquip(true,false) -- equip
-                                            end 
-                                        else  -- if char has no swordS
-                                            AutoEquip(true,false) -- then equip
-                                        end
+                                        _G.autoswing = true
                                     until not checkForMobs() or v:FindFirstChild("Humanoid") == nil or v:FindFirstChild("Humanoid").Health <= 0 or ws:FindFirstChild("HalloweenTower") == nil-- until no mobs exist
                                 else 
                                 end 
@@ -707,6 +692,7 @@ spawn(function()
                         end
                     if not checkForMobs() then break end 
                 end 
+                _G.autoswing = false
                 getChests(st.tweenchest)
                 wait(0.5)
                 AutoDrop()
@@ -849,4 +835,20 @@ spawn(function()
             wait(1)
         end
     end 
+end)
+spawn(function()
+    while true do wait()
+        if _G.autoswing then
+            pcall(function()
+                if char:FindFirstChild("Sword") then 
+                    char.Sword:Activate()
+                    if char.Sword.Config.ITEMID.Value ~= st.farmid then 
+                        AutoEquip(true,false)
+                    end 
+                else
+                    AutoEquip(true,false)
+                end 
+            end)
+        end
+    end
 end)

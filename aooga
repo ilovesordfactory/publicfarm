@@ -8,8 +8,6 @@ local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
 wait(0.5)
-Library:SetWatermarkVisibility(true)
-Library:SetWatermark('made by kly#0531')
 
 --[[ regular script variables]]--
 plr = game.Players.LocalPlayer 

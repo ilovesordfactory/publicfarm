@@ -711,6 +711,7 @@ spawn(function()
                 wait(0.5)
                 AutoDrop()
                 wait(0.5)
+                AutoEquip(true,false)
                 if ws:FindFirstChild("HalloweenTower") ~= nil then
                     for i,v in pairs(ws:FindFirstChild("HalloweenTower").EndModule.Parts.Stands:GetChildren()) do 
                         if v:FindFirstChildWhichIsA("TextLabel",true).Text == plr.Name then 

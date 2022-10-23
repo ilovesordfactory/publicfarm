@@ -266,6 +266,12 @@ config:AddButton('Reset Current Config',function()
     writefile('finalfarm/'..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end)
 --[[ all function s for dungion farm]] -- 
+--[[ 
+    Auto Drop Check Enchant
+    This is for keeping Chestfinder+ swords.
+]]--
+
+--[[ GET CHEST FUNCTION ( THIS WILL BE LONG LIKE MY MASSIVE SCHLONG]]--
 function Chestfinder(a)
     if st.keepchest then
         for i,v in pairs(a:GetChildren()) do 
@@ -279,10 +285,12 @@ function Chestfinder(a)
         end 
     end 
 end 
---[[ 
-    Auto Drop Check Enchant
-    This is for keeping Chestfinder+ swords.
-]]--
+--[[ checking the timer]]-- 
+function checkTimeApart(startedtime,glort)
+    if tick()-startedtime >= glort then 
+        return true 
+    end
+end
 function AutoDrop()
     char.Humanoid:UnequipTools() -- make sure every sword is in backpackw
     wait(0.2) -- wait a lil bit
@@ -330,9 +338,9 @@ end
 function Tween(Part,ExtraX,ExtraY,ExtraZ)
     DistanceApart = (char.HumanoidRootPart.Position-Part.Position).Magnitude
     Info = TweenInfo.new(DistanceApart/st.savedspeed,Enum.EasingStyle.Linear)
-    a = ts:Create(char.HumanoidRootPart,Info,{CFrame = Part.CFrame*CFrame.new(ExtraX,ExtraY,ExtraZ)}) 
-    a:Play()
-    a.Completed:Wait()
+    _G.a = ts:Create(char.HumanoidRootPart,Info,{CFrame = Part.CFrame*CFrame.new(ExtraX,ExtraY,ExtraZ)}) 
+    _G.a:Play()
+    _G.a.Completed:Wait()
 end 
 function Comma(amount)
     while true do wait()
@@ -401,11 +409,152 @@ function ClosestMob(table)
     end
     return ClosestMobReturned
 end 
---[[ function that finds the nearest chest ( for tween to chests) ]]--
+--[[ fucntion for getting chests cuz i cnat mkae it wokr otherwise cuz im terrible scripter]]--
+function getChests(tween)
+    if tween then 
+        wait(3)
+        while true do task.wait()
+            _G.chests = {}
+            if not ws.Mobs:FindFirstChild("Scarecrow") or ws.Mobs:FindFirstChild("Skeleton") then 
+                for names,_ in pairs(require(rs.SharedLibrary.Chests)) do 
+                    if ws:FindFirstChild("HalloweenTower") ~= nil then 
+                        for i,v in pairs(ws:FindFirstChild("HalloweenTower"):GetDescendants()) do 
+                            if v.Name == names then 
+                                if v:FindFirstChild("Effect") then
+                                    if v:FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") == nil or v:FindFirstChild("Lock") == nil then
+                                        table.insert(_G.chests,v)
+                                    end 
+                                end 
+                            end
+                        end
+                    end
+                end
+            end
+            print(#_G.chests)
+            wait(0.1)
+            if #_G.chests == 0 then break end
+            print('hi')
+            tweenclose = 9e9
+            for i,v in pairs(_G.chests) do 
+                if (char.HumanoidRootPart.Position-v:FindFirstChild("Effect").Position).Magnitude then 
+                    tweendist = (char.HumanoidRootPart.Position-v:FindFirstChild("Effect").Position).Magnitude
+                    if tweendist < tweenclose then 
+                        tweenclose = tweendist 
+                        tr = v 
+                    end
+                end
+            end 
+            wait(0.01)
+            repeat wait()
+                print('got to this')
+                nogp = false
+                nokeys = false
+                AutoEquip(false,true)
+                for i,v in pairs(plr.Backpack:GetChildren()) do 
+                    if i >= 9 then 
+                        AutoDrop()
+                    end
+                end 
+                if tr.Name == "ExtraHallowedChest" then 
+                    if rs.Data[plr.Name].Stats.ExtraChest.Value == false then 
+                        nogp = true 
+                    end
+                end 
+                if tr.Name == "MaliceChest" then 
+                    if plr.PlayerGui.MainGui.Inventory:FindFirstChild("Item") == nil then 
+                        nokeys = true 
+                    end
+                end 
+                Tween(tr.Effect,0,0,0)
+                if tr:FindFirstChildWhichIsA("ProximityPrompt",true) then 
+                    fireproximityprompt(tr:FindFirstChildWhichIsA("ProximityPrompt",true),100)
+                end
+                for i,v in pairs(plr.Backpack:GetChildren()) do 
+                    if i >= 9 then 
+                        AutoDrop()
+                    end
+                end 
+            until tr:FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") ~= nil or tr:FindFirstChild("Lock") == nil or ws:FindFirstChild("HalloweenTower") == nil or nokeys == true or nogp == true
+            tr.Name = "collected"
+        end
+    else
+        if not ws.Mobs:FindFirstChild("Scarecrow") or ws.Mobs:FindFirstChild("Skeleton") then 
+            for names,_ in pairs(require(rs.SharedLibrary.Chests)) do 
+                if ws:FindFirstChild("HalloweenTower") ~= nil then
+                    for i,v in pairs(ws:FindFirstChild("HalloweenTower"):GetDescendants()) do 
+                        if v.Name == names then 
+                            if v:FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") == nil or v:FindFirstChild("Lock") == nil then 
+                                nokeys = false
+                                nogp = false
+                                repeat wait()
+                                    for i,v in pairs(plr.Backpack:GetChildren()) do 
+                                        if i >= 9 then 
+                                            AutoDrop()
+                                        end
+                                    end
+                                    if v.Name == "MaliceChest" then 
+                                        if plr.PlayerGui.MainGui.Inventory.Holder:FindFirstChild("Item") == nil then 
+                                            nokeys = true 
+                                        end 
+                                    end
+                                    if v.Name == "ExtraHallowedChest" then 
+                                        if rs.Data[plr.Name].Stats.ExtraChest.Value == false then 
+                                            nogp = true 
+                                        end
+                                    end 
+                                    if char:FindFirstChild("Sword") then 
+                                        if char:FindFirstChild("Sword").Config.ITEMID.Value ~= st.chestid then 
+                                            AutoEquip(false,true)
+                                        end
+                                    else
+                                        AutoEquip(false,true)
+                                    end
+                                    if st.tweenchest then 
+                                        if v:FindFirstChild("Effect") then
+                                            Tween(v.Effect)
+                                        else
+                                        end
+                                    else
+                                        if v:FindFirstChild("Effect") then
+                                            if (char.HumanoidRootPart.Position-v.Effect.Position).Magnitude <= 1000 then 
+                                                char.HumanoidRootPart.CFrame = v.Effect.CFrame 
+                                            else
+                                                warn 'farm died'
+                                            end
+                                        else
+                                        end
+                                    end 
+                                    AutoEquip(false,true)
+                                    if v:FindFirstChildWhichIsA("ProximityPrompt",true) then 
+                                        fireproximityprompt(v:FindFirstChildWhichIsA("ProximityPrompt",true),100)
+                                    end
+                                    if char:FindFirstChild("Sword") == nil then 
+                                    else
+                                        char.Sword:Activate()
+                                    end 
+                                until v:FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") ~= nil or v:FindFirstChild("Lock") ~= nil or nokeys or nogp or ws:FindFirstChild("HalloweenTower") == nil
+                                for i,v in pairs(plr.Backpack:GetChildren()) do 
+                                    if i >= 9 then 
+                                        AutoDrop()
+                                    end
+                                end
+                            end 
+                        end 
+                    end 
+                end
+            end
+        else 
+            rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
+        end
+    end
+end
+--[[ function that finds the nearest chest ( for tween to chests)]]--
 --[[ start of the actual toggles farming]]--
 spawn(function()
     while true do wait()
         if st.dungeonfarm then 
+            pcall(function()
+                breaktimer = true
                 if game.Players.LocalPlayer.PlayerGui.MainGui:FindFirstChild("DungeonSummary") then
                     game.Players.LocalPlayer.PlayerGui.MainGui.DungeonSummary:Destroy()
                 end
@@ -429,6 +578,19 @@ spawn(function()
                 repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Scriptable -- wait until cutscene is active
                 repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Custom -- wait until cutscene is over
                 repeat wait() until findLoadedMobs() -- wait 5 seconds to give mobs to do load
+                breaktimer = false
+                startedTime = tick()
+                if ws:FindFirstChild("HalloweenTower") then 
+                    spawn(function()
+                        while true do task.wait(0.5)
+                            if breaktimer then break end
+                            if checkTimeApart(startedTime,120) then 
+                                rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
+                                _G.a:Cancel()
+                            end
+                        end
+                    end)
+                end
                 nohumanoidrootpart = false
                     while wait() do -- start a loop
                         mobs = {} -- define a table ( mobs will go here)!
@@ -478,7 +640,7 @@ spawn(function()
                                         if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") then
                                             if v:FindFirstChild("Humanoid") ~= nil then 
                                                 v.Humanoid.Health = 0
-                                                char.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame*CFrame.new(0,3,2.5) -- tp to boss
+                                                Tween(v.HumanoidRootPart,0,3,2.5)
                                             end 
                                         else 
                                         end
@@ -498,66 +660,7 @@ spawn(function()
                         end
                     if not checkForMobs() then break end 
                 end 
-                if not ws.Mobs:FindFirstChild("Scarecrow") or ws.Mobs:FindFirstChild("Skeleton") then 
-                    for names,_ in pairs(require(rs.SharedLibrary.Chests)) do 
-                        if ws:FindFirstChild("HalloweenTower") ~= nil then
-                            for i,v in pairs(ws:GetChildren()) do 
-                                if v.Name == "HalloweenTower" then
-                                    if v:FindFirstChild(names,true) then 
-                                        if v:FindFirstChild(names,true):FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") == nil or v:FindFirstChild(names,true):FindFirstChild("Lock") == nil then 
-                                            nokeys = false
-                                            nogp = false
-                                            repeat wait()
-                                                for i,v in pairs(plr.Backpack:GetChildren()) do 
-                                                    if i >= 9 then 
-                                                        AutoDrop()
-                                                    end
-                                                end
-                                                if v:FindFirstChild(names,true).Name == "MaliceChest" then 
-                                                    if plr.PlayerGui.MainGui.Inventory.Holder:FindFirstChild("Item") == nil then 
-                                                        nokeys = true 
-                                                    end 
-                                                end
-                                                if v:FindFirstChild(names,true).Name == "ExtraHallowedChest" then 
-                                                    if rs.Data[plr.Name].Stats.ExtraChest.Value == false then 
-                                                        nogp = true 
-                                                    end
-                                                end 
-                                                if char:FindFirstChild("Sword") then 
-                                                    if char:FindFirstChild("Sword").Config.ITEMID.Value ~= st.chestid then 
-                                                        AutoEquip(false,true)
-                                                    end
-                                                else
-                                                    AutoEquip(false,true)
-                                                end
-                                                if st.tweenchest then 
-                                                    Tween(v:FindFirstChild(names,true).Effect)
-                                                else
-                                                    char.HumanoidRootPart.CFrame = v:FindFirstChild(names,true).Effect.CFrame 
-                                                end 
-                                                AutoEquip(false,true)
-                                                if v:FindFirstChild(names,true):FindFirstChildWhichIsA("ProximityPrompt",true) then 
-                                                    fireproximityprompt(v:FindFirstChild(names,true):FindFirstChildWhichIsA("ProximityPrompt",true),100)
-                                                end
-                                                if char:FindFirstChild("Sword") == nil then 
-                                                else
-                                                    char.Sword:Activate()
-                                                end 
-                                            until v:FindFirstChild(names,true):FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") ~= nil or v:FindFirstChild(names,true):FindFirstChild("Lock") ~= nil or nokeys or nogp or ws:FindFirstChild("HalloweenTower") == nil
-                                            for i,v in pairs(plr.Backpack:GetChildren()) do 
-                                                if i >= 9 then 
-                                                    AutoDrop()
-                                                end
-                                            end
-                                        end
-                                    end 
-                                end 
-                            end 
-                        end
-                    end
-                else 
-                    rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
-                end
+                getChests(st.tweenchest)
                 wait(0.5)
                 AutoDrop()
                 wait(0.5)
@@ -576,6 +679,7 @@ spawn(function()
                 dungeonDone = false
                 rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
                 repeat wait() until ws:FindFirstChild("HalloweenTower") == nil
+            end)
         end
     end
 end)

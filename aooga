@@ -448,7 +448,7 @@ end
 --[[ fucntion for getting chests cuz i cnat mkae it wokr otherwise cuz im terrible scripter]]--
 function getChests(tween)
     if tween then 
-        wait(1)
+        wait(2)
         while true do task.wait()
             _G.chests = {}
             if not ws.Mobs:FindFirstChild("Scarecrow") or ws.Mobs:FindFirstChild("Skeleton") then 

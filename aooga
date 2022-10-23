@@ -446,7 +446,7 @@ end
 --[[ fucntion for getting chests cuz i cnat mkae it wokr otherwise cuz im terrible scripter]]--
 function getChests(tween)
     if tween then 
-        wait(3)
+        wait(1)
         while true do task.wait()
             _G.chests = {}
             if not ws.Mobs:FindFirstChild("Scarecrow") or ws.Mobs:FindFirstChild("Skeleton") then 
@@ -507,7 +507,7 @@ function getChests(tween)
                         nokeys = true 
                     end
                 end 
-                Tween(tr.Effect,0,0,0)
+                Tween(tr.Effect,1.5,0,0)
                 if tr:FindFirstChildWhichIsA("ProximityPrompt",true) then 
                     fireproximityprompt(tr:FindFirstChildWhichIsA("ProximityPrompt",true),100)
                 end

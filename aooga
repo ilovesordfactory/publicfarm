@@ -291,7 +291,7 @@ config:AddButton('Reset Current Config',function()
         fps = 5,
         render = false,
         cap = false,
-        tweenchests = false,
+        tweenchest = false,
         onetap = false,
         addsoul = false,
     }

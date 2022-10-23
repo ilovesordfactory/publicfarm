@@ -318,6 +318,7 @@ function checkTimeApart(startedtime,glort)
     end
 end
 function AutoDrop()
+    dropping = true
     char.Humanoid:UnequipTools() -- make sure every sword is in backpackw
     wait(0.2) -- wait a lil bit
     for i,v in pairs(plr.Backpack:GetChildren()) do -- loop through backpack
@@ -335,6 +336,7 @@ function AutoDrop()
             end
         end
     end
+    dropping = false
 end 
 --[[
     Enter Graveyard Function:
@@ -478,7 +480,9 @@ function getChests(tween)
                 task.spawn(function()
                     while true do task.wait()
                         if #_G.chests == 0 then break end 
-                        AutoEquip(false,true)
+                        if dropping == false then
+                            AutoEquip(false,true)
+                        end
                     end 
                 end)
                 for i,v in pairs(plr.Backpack:GetChildren()) do 

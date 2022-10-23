@@ -42,6 +42,7 @@ if not isfile("finalfarm/"..plr.Name.."/dungeonsettings.txt") then
         render = false,
         cap = false,
         tweenchest = false,
+        onetap = false,
     }
     writefile("finalfarm/"..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end
@@ -66,22 +67,30 @@ local Tabs = {
 
 --[[ Section for autofarm ]]--
 autofarm = Tabs.Main:AddLeftGroupbox("[Autofarm]")
+autofarmset = Tabs.Main:AddLeftGroupbox("[Other Autofarm Options]")
 autofarm:AddToggle("dfarm",{
     Text = "Dungeon Farm Toggle",
     Default = st.dungeonfarm,
     Tooltip = "Enable or Disable Dungeon Farm Toggle"
 })
-autofarm:AddToggle("keeptoggle",{
+autofarmset:AddToggle("keeptoggle",{
     Text = "Keep Chestfinder+?",
     Default = st.keepchest,
     Tooltip = "will keep chestfinder+ swords u get from dungions"
 })
-autofarm:AddToggle("tweenc",{
+autofarmset:AddToggle("tweenc",{
     Text = "Tween to Chests",
     Default = st.tweenchest, 
-    Tooltip = "this will tween rather than tp to chests",
+    Tooltip = "this will tween rather than tp to chests\nless kicks, may miss chests tho (fixing later)",
 })
-
+autofarmset:AddToggle('instakill',{
+    Text = "One Tap Boss",
+    Default = st.onetap, 
+    Tooltip = "Note: This feature is inconsistent, but it will not break the script, I recommend it."
+})
+Toggles.instakill:OnChanged(function()
+    st.onetap = Toggles.instakill.Value 
+end)
 Toggles.tweenc:OnChanged(function()
     st.tweenchest = Toggles.tweenc.Value 
 end)
@@ -200,7 +209,7 @@ end)
 -- seperation thign
 
 webtoggle:AddToggle("sendweb",{
-    Text = "Send Webhook after Every Dungeon",
+    Text = "Send Dungeon Summary",
     Default = st.sendwebhook,
     Tooltip = 'this sends a dungeon summary its sexy use it ok mommy?'
 })
@@ -262,6 +271,7 @@ config:AddButton('Reset Current Config',function()
         render = false,
         cap = false,
         tweenchests = false,
+        onetap = false,
     }
     writefile('finalfarm/'..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end)
@@ -456,6 +466,7 @@ function getChests(tween)
                     end
                 end 
                 if tr.Name == "ExtraHallowedChest" then 
+                    wait(1)
                     if rs.Data[plr.Name].Stats.ExtraChest.Value == false then 
                         nogp = true 
                     end
@@ -639,7 +650,9 @@ spawn(function()
                                     repeat wait(0.1) -- repeat 
                                         if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") then
                                             if v:FindFirstChild("Humanoid") ~= nil then 
-                                                v.Humanoid.Health = 0
+                                                if st.onetap then
+                                                    v.Humanoid.Health = 0   
+                                                end
                                                 Tween(v.HumanoidRootPart,0,3,2.5)
                                             end 
                                         else 

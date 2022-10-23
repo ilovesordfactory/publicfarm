@@ -405,7 +405,7 @@ spawn(function()
                 until ws:FindFirstChild("HalloweenTower") ~= nil 
                 repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Scriptable -- wait until cutscene is active
                 repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Custom -- wait until cutscene is over
-                wait(3) -- wait 5 seconds to give mobs to do load
+                wait(6) -- wait 5 seconds to give mobs to do load
                 while wait() do -- start a loop
                     mobs = {} -- define a table ( mobs will go here)!
                     for i,v in pairs(ws.Mobs:GetChildren()) do -- loop through mob folder

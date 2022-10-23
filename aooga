@@ -1,4 +1,8 @@
 --[[ Library Variables ]]--
+repeat wait() until game:IsLoaded()
+for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do 
+v:Disable()
+end
 local repo = 'https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
@@ -43,6 +47,7 @@ if not isfile("finalfarm/"..plr.Name.."/dungeonsettings.txt") then
         cap = false,
         tweenchest = false,
         onetap = false,
+        addsoul = false,
     }
     writefile("finalfarm/"..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end
@@ -68,6 +73,8 @@ local Tabs = {
 --[[ Section for autofarm ]]--
 autofarm = Tabs.Main:AddLeftGroupbox("[Autofarm]")
 autofarmset = Tabs.Main:AddLeftGroupbox("[Other Autofarm Options]")
+misc = Tabs.Main:AddLeftGroupbox("[Misc]")
+
 autofarm:AddToggle("dfarm",{
     Text = "Dungeon Farm Toggle",
     Default = st.dungeonfarm,
@@ -88,6 +95,14 @@ autofarmset:AddToggle('instakill',{
     Default = st.onetap, 
     Tooltip = "Note: This feature is inconsistent, but it will not break the script, I recommend it."
 })
+misc:AddToggle('add',{
+    Text = 'Auto add souls',
+    Default = st.addsoul,
+    Tooltip = "this will auto add souls at 1 second intervals"
+})
+Toggles.add:OnChanged(function()
+    st.addsoul = Toggles.add.Value
+end)
 Toggles.instakill:OnChanged(function()
     st.onetap = Toggles.instakill.Value 
 end)
@@ -272,6 +287,7 @@ config:AddButton('Reset Current Config',function()
         cap = false,
         tweenchests = false,
         onetap = false,
+        addsoul = false,
     }
     writefile('finalfarm/'..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end)
@@ -805,4 +821,12 @@ spawn(function()
             setfpscap(120)
         end
     end
+end)
+spawn(function()
+    while true do wait()
+        if st.addsoul then 
+            rs.Framework.RemoteFunction:InvokeServer(0,"SoulTankService","AddSouls",{})
+            wait(1)
+        end
+    end 
 end)

@@ -708,6 +708,7 @@ spawn(function()
                 dungeonDone = false
                 rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
                 repeat wait() until ws:FindFirstChild("HalloweenTower") == nil
+                breaktimer = true
             end)
         end
     end

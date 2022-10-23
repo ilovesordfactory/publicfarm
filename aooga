@@ -475,7 +475,12 @@ function getChests(tween)
                 print('got to this')
                 nogp = false
                 nokeys = false
-                AutoEquip(false,true)
+                task.spawn(function()
+                    while true do task.wait()
+                        if #_G.chests == 0 then break end 
+                        AutoEquip(false,true)
+                    end 
+                end)
                 for i,v in pairs(plr.Backpack:GetChildren()) do 
                     if i >= 9 then 
                         AutoDrop()

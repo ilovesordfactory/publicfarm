@@ -10,7 +10,13 @@ local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
 
 --[[ regular script variables]]--
 plr = game.Players.LocalPlayer 
-char = plr.Character or plr.CharacterAdded:Wait()
+task.spawn(function()
+    while true do wait()
+        pcall(function()
+            char = plr.Character or plr.CharacterAdded:Wait()
+        end)
+    end
+end)
 --[[ next we define
 @rs = replicatedStorage
 @ts = tweenservice

@@ -319,6 +319,7 @@ function Chestfinder(a)
 end 
 --[[ checking the timer]]-- 
 function checkTimeApart(startedtime,glort)
+    print(tick()-startedtime)
     if tick()-startedtime >= glort then 
         return true 
     end
@@ -595,43 +596,46 @@ end
 spawn(function()
     while true do wait()
         if st.dungeonfarm then 
+            _G.autoswing = false
             pcall(function()
-                breaktimer = true
-                if game.Players.LocalPlayer.PlayerGui.MainGui:FindFirstChild("DungeonSummary") then
-                    game.Players.LocalPlayer.PlayerGui.MainGui.DungeonSummary:Destroy()
-                end
-                AutoEquip(true,false)
-                ws.Gravity = 0
-                enterGraveyard()
-                wait(2)
-                AutoDrop()
-                AutoEquip(true,false)
-                repeat wait() 
-                    if ws:FindFirstChild("HalloweenTower") == nil then 
-                        if ws.Maps.Graveyard.Brick.BillboardGui.Counter.Visible == false then
-                            if (char.HumanoidRootPart.Position-ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad.Position).Magnitude >= 35 then
-                                Tween(ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad,0,5,0)
-                            else 
-                                ws.Gravity = 198 -- set gravity back to normal when near pad 
-                            end
-                        end
+                if ws:FindFirstChild("HalloweenTower") == nil then
+                    breaktimer = true
+                    if game.Players.LocalPlayer.PlayerGui.MainGui:FindFirstChild("DungeonSummary") then
+                        game.Players.LocalPlayer.PlayerGui.MainGui.DungeonSummary:Destroy()
                     end
-                until ws:FindFirstChild("HalloweenTower") ~= nil 
-                repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Scriptable -- wait until cutscene is active
-                repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Custom -- wait until cutscene is over
-                repeat wait() until findLoadedMobs() -- wait 5 seconds to give mobs to do load
-                breaktimer = false
-                startedTime = tick()
-                if ws:FindFirstChild("HalloweenTower") then 
-                    spawn(function()
-                        while true do task.wait(0.5)
-                            if breaktimer then break end
-                            if checkTimeApart(startedTime,120) then 
-                                rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
-                                _G.a:Cancel()
+                    AutoEquip(true,false)
+                    ws.Gravity = 0
+                    enterGraveyard()
+                    wait(2)
+                    AutoDrop()
+                    AutoEquip(true,false)
+                    repeat wait() 
+                        if ws:FindFirstChild("HalloweenTower") == nil then 
+                            if ws.Maps.Graveyard.Brick.BillboardGui.Counter.Visible == false then
+                                if (char.HumanoidRootPart.Position-ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad.Position).Magnitude >= 35 then
+                                    Tween(ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad,0,5,0)
+                                else 
+                                    ws.Gravity = 198 -- set gravity back to normal when near pad 
+                                end
                             end
                         end
-                    end)
+                    until ws:FindFirstChild("HalloweenTower") ~= nil 
+                    repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Scriptable -- wait until cutscene is active
+                    repeat wait() until ws.CurrentCamera.CameraType == Enum.CameraType.Custom -- wait until cutscene is over
+                    repeat wait() until findLoadedMobs() -- wait 5 seconds to give mobs to do load
+                    breaktimer = false
+                    startedTime = tick()
+                    if ws:FindFirstChild("HalloweenTower") then 
+                        spawn(function()
+                            while true do task.wait(0.5)
+                                if breaktimer then break end
+                                if checkTimeApart(startedTime,120) then 
+                                    rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
+                                    _G.a:Cancel()
+                                end
+                            end
+                        end)
+                    end 
                 end
                 nohumanoidrootpart = false
                     while wait() do -- start a loop
@@ -662,6 +666,7 @@ spawn(function()
                             break 
                         end
                     end 
+                    _G.autoswing = false
                     wait(1)
                     if ws:FindFirstChild("HalloweenTower") then 
                         char.HumanoidRootPart.CFrame = ws:FindFirstChild("HalloweenTower").EndModule.Parts.PlayerEnterTrigger.CFrame
@@ -691,6 +696,7 @@ spawn(function()
                     if not checkForMobs() then break end 
                 end 
                 _G.autoswing = false
+                char.HumanoidRootPart.CFrame = ws:FindFirstChild("HalloweenTower").EndModule.Parts.FinalBossSpawn.CFrame
                 getChests(st.tweenchest)
                 wait(0.5)
                 AutoDrop()

@@ -493,7 +493,7 @@ function getChests(tween)
                     end 
                 end)
                 for i,v in pairs(plr.Backpack:GetChildren()) do 
-                    if i >= 9 then 
+                    if i >= 8 then 
                         AutoDrop()
                     end
                 end 
@@ -513,7 +513,7 @@ function getChests(tween)
                     fireproximityprompt(tr:FindFirstChildWhichIsA("ProximityPrompt",true),100)
                 end
                 for i,v in pairs(plr.Backpack:GetChildren()) do 
-                    if i >= 9 then 
+                    if i >= 8 then 
                         AutoDrop()
                     end
                 end 
@@ -531,7 +531,7 @@ function getChests(tween)
                                 nogp = false
                                 repeat wait()
                                     for i,v in pairs(plr.Backpack:GetChildren()) do 
-                                        if i >= 9 then 
+                                        if i >= 8 then 
                                             AutoDrop()
                                         end
                                     end
@@ -577,7 +577,7 @@ function getChests(tween)
                                     end 
                                 until v:FindFirstChild("Chest_Base").Body:FindFirstChild("Dungeon_Doors") ~= nil or v:FindFirstChild("Lock") ~= nil or nokeys or nogp or ws:FindFirstChild("HalloweenTower") == nil
                                 for i,v in pairs(plr.Backpack:GetChildren()) do 
-                                    if i >= 9 then 
+                                    if i >= 8 then 
                                         AutoDrop()
                                     end
                                 end
@@ -663,8 +663,14 @@ spawn(function()
                         if ws:FindFirstChild("HalloweenTower") == nil then break end 
                         nohumanoidrootpart = false
                         if not checkForMobs() then 
-                            break 
+                            checkAgain = true 
+                            endrepeat = false
                         end
+                        if checkAgain == true then 
+                            checkTimer = tick()
+                            repeat if checkForMobs() then endrepeat = true else endrepeat = false end wait() until endrepeat == true or tick()-checkTimer >= 2 
+                            if not endrepeat then break end 
+                        end 
                     end 
                     _G.autoswing = false
                     wait(1)

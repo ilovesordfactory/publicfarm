@@ -1,5 +1,10 @@
 --[[ Library Variables ]]--
 repeat wait() until game:IsLoaded()
+pcall(function()
+	Nexus_Version = 101
+	loadstring(game:HttpGet'https://raw.githubusercontent.com/ic3w0lf22/Roblox-Account-Manager/master/RBX%20Alt%20Manager/Nexus/Nexus.lua')()
+	Nexus:Connect()
+end)
 for i,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do 
 v:Disable()
 end
@@ -47,7 +52,6 @@ if not isfile("finalfarm/"..plr.Name.."/dungeonsettings.txt") then
         rarity = 1,
         mold = 1,
         url = "",
-        id = "",
         sendwebhook = false,
         fps = 5,
         render = false,
@@ -55,8 +59,12 @@ if not isfile("finalfarm/"..plr.Name.."/dungeonsettings.txt") then
         tweenchest = false,
         onetap = false,
         addsoul = false,
+        pingifnewsword = false,
     }
     writefile("finalfarm/"..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
+end
+if not isfile("finalfarm/"..plr.Name.."/newswordids.txt") then 
+    writefile("finalfarm/"..plr.Name.."/newswordids.txt","")
 end
 writefile("finalfarm/"..plr.Name.."/totalgems.txt",plr.PlayerGui.MainGui.TopHolder.Gems.Price.Text:gsub("%p",""))
 writefile("finalfarm/"..plr.Name.."/totalimp.txt",plr.PlayerGui.MainGui.ArtifactMenu.Holder.Impossible.Amount.Text:gsub("x",""))
@@ -74,6 +82,8 @@ local Tabs = {
     -- Creates a new tab titled Main
     Main = Window:AddTab('Main'),
     Web = Window:AddTab("Webhook"),
+    Gift = Window:AddTab("Gifts"),
+    Boost = Window:AddTab("Boosts"),
     Set = Window:AddTab("Settings"),
 }
 
@@ -171,7 +181,12 @@ for i,v in pairs(require(rs.SharedLibrary.Rarities).List) do
         table.insert(rarityTable,v.Name)
     end
 end
---[[ end of dropdown section vars]]--
+EnchantTable = {}
+for i,v in pairs(require(rs.SharedLibrary.Enchants).List) do
+    if not table.find(EnchantTable,v.Name) and v.Chance ~= math.huge then
+        table.insert(EnchantTable,v.Name)
+    end
+end
 dropdowns = Tabs.Main:AddRightGroupbox("[Dropdowns]")
 
 dropdowns:AddDropdown('rarity', {
@@ -191,6 +206,7 @@ dropdowns:AddDropdown('mold', {
     Text = 'Mold Selected: ',
     Tooltip = 'keeps this mold and above', -- Information shown when you hover over the textbox
 })
+
 
 Options.rarity:OnChanged(function()
     st.rarity = table.find(rarityTable,Options.rarity.Value)
@@ -213,19 +229,9 @@ webst:AddInput("url",{
     Text = "Webhook URL",
     Tooltip = "Input webhook url here for a cookie (my fat juicy cock)",
 })
-webst:AddInput("id",{
-    Default = st.id,
-    Numeric = true,
-    Finished = true,
-    Text = "Discord ID",
-    Tooltip = "This is an optional thing (i dont recommend many ping)",
-})
 
 Options.url:OnChanged(function()
     st.url = tostring(Options.url.Value)
-end)
-Options.id:OnChanged(function()
-    st.id = tostring(Options.id.Value)
 end)
 
 -- seperation thign
@@ -235,11 +241,145 @@ webtoggle:AddToggle("sendweb",{
     Default = st.sendwebhook,
     Tooltip = 'this sends a dungeon summary its sexy use it ok mommy?'
 })
-
+webtoggle:AddToggle('ping',{
+    Text = "Ping on new item",
+    Default = st.pingifnewsword,
+    Tooltip = 'this will ping you when you get a new sword (it will ping again if u leave and rejoin and the swords become new',
+})
+Toggles.ping:OnChanged(function()
+    st.pingifnewsword = Toggles.ping.Value
+end)
 Toggles.sendweb:OnChanged(function()
     st.sendwebhook = Toggles.sendweb.Value
 end)   
+--[[ start of gifts tab]]--
+
+function findHighestGiftByType(Type,Folder,InfoOnly)
+    decodedgifts = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value) 
+    findHighestTable = {}
+    for i,v in pairs(decodedgifts) do 
+        table.insert(findHighestTable,"ID: "..i..Type..": "..v.Config[Type])
+    end 
+
+    high = 0 
+    for i,v in pairs(findHighestTable) do 
+        es = v:match(Type.."%p%s(%d+)")
+        if tonumber(es) > high and tonumber(es) < 500 then 
+            high = tonumber(es)
+            claim = v:match("ID%p%s(%d+)")
+        end
+    end
+    if not InfoOnly then
+        game:GetService("ReplicatedStorage").Framework.RemoteEvent:FireServer(0,"ProductHandler","AcceptGift",{claim})
+    end
+    if Folder == "Classes" then
+        return "Claimed "..Type.." : "..rs[Folder][high][Type.."Names"].Value
+    else
+        return "Claimed "..Type.." : "..rs[Folder][high][Type.."Name"].Value
+    end
+end
+--[[ start of ui part of gifts tab]]--
+settings = Tabs.Gift:AddRightGroupbox("Settings")
+claim = Tabs.Gift:AddLeftGroupbox("Buttons")
+selectedfolder = "Rarities"
+settings:AddDropdown('gifts',{
+    Values = {"Rarity","Quality","Class","Mold"},
+    Default = 1,
+    Multi = false,
+    Text = "Find Highest: ",
+    Tooltip = "pressing hte claim button will find the highest of what you select here"
+})
+settings:AddButton('Gift Amount (Accurate)',function()
+    decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
+    game.StarterGui:SetCore("SendNotification",{
+        Title = "Checking...",
+        Text = tostring(#decoded),
+    })
+end)
+Options.gifts:OnChanged(function() 
+    selectedtype = Options.gifts.Value 
+    if selectedtype == "Mold" then 
+        selectedfolder = "Molds"
+    elseif selectedtype == "Rarity" then 
+        selectedfolder = "Rarities"
+    elseif selectedtype == "Class" then 
+        selectedfolder = "Classes"
+    elseif selectedtype == "Quality" then 
+        selectedfolder = "Qualities"
+    end
+end)
+claim:AddButton('Get Highest Info',function()
+    game.StarterGui:SetCore("SendNotification",{
+        Title = "Selected Type: "..selectedtype,
+        Text = findHighestGiftByType(tostring(selectedtype),tostring(selectedfolder),true),
+    })
+end)
+
+claim:AddButton('Claim',function()
+    findHighestGiftByType(tostring(selectedtype),tostring(selectedfolder),false)
+end)
+claim:AddButton("Claim All (Stand still)",function()
+    decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
+    for i,v in pairs(decoded) do 
+        game:GetService("ReplicatedStorage").Framework.RemoteEvent:FireServer(0,"ProductHandler","AcceptGift",{i})
+    end
+end)
 --[[ end of webhook tab]]--
+--[[ start of boost tab]]--
+boostset = Tabs.Boost:AddRightGroupbox("Boosts")
+boosttogsec = Tabs.Boost:AddLeftGroupbox("Buttons")
+boostset:AddDropdown('boost',{
+    Values = {"Cash","Damage","Luck","Souls","EXP","UltraLuck"},
+    Default = 1,
+    Multi = false,
+    Text = 'select boost to buy',
+    Tooltip = 'this selects the amount of boosts to buy',
+})
+boostset:AddInput('amount',{
+    Default = "",
+    Numeric = true, 
+    Finished = true,
+    Text = "amount of boosts to buy",
+    Tooltip = "type here the amount of boosts u wanna buy (only numbers)",
+})
+Options.boost:OnChanged(function()
+    boostwanted = Options.boost.Value
+end)
+Options.amount:OnChanged(function()
+    boostswanted = Options.amount.Value
+end)
+-- a
+boosttogsec:AddButton('Buy',function()
+    runservice = game:GetService("RunService")
+    local connection 
+    counter = 0
+    function Buy()
+        print('hi')
+        if counter < tonumber(boostswanted) then 
+            counter = counter+1
+            rs.Framework.RemoteFunction:InvokeServer(0,"BoostService","BuyWithGems",{tostring(boostwanted),"30Min"})
+        else
+            connection:Disconnect()
+        end
+    end
+    connection = runservice.Heartbeat:Connect(Buy)
+end)
+boosttogsec:AddButton('Use',function()
+    runservice = game:GetService("RunService")
+    local connection 
+    counter = 0
+    function Use()
+        print('hi')
+        if counter < tonumber(boostswanted) then 
+            counter = counter+1
+            rs.Framework.RemoteFunction:InvokeServer(0,"BoostService","Use",{tostring(boostwanted),"30Min"})
+        else
+            connection:Disconnect()
+        end
+    end
+    connection = runservice.Heartbeat:Connect(Use)
+end)
+
 --[[ start of settings tab]]
 perf = Tabs.Set:AddLeftGroupbox("[Performance Settings]")
 config = Tabs.Set:AddRightGroupbox("[Save Config]")
@@ -287,7 +427,6 @@ config:AddButton('Reset Current Config',function()
         rarity = 1,
         mold = 1,
         url = "",
-        id = "",
         sendwebhook = false,
         fps = 5,
         render = false,
@@ -295,6 +434,7 @@ config:AddButton('Reset Current Config',function()
         tweenchest = false,
         onetap = false,
         addsoul = false,
+        pingifnewsword = false,
     }
     writefile('finalfarm/'..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end)
@@ -465,10 +605,8 @@ function getChests(tween)
                     end
                 end
             end
-            print(#_G.chests)
             wait(0.1)
             if #_G.chests == 0 then break end
-            print('hi')
             tweenclose = 9e9
             for i,v in pairs(_G.chests) do 
                 if (char.HumanoidRootPart.Position-v:FindFirstChild("Effect").Position).Magnitude then 
@@ -481,7 +619,6 @@ function getChests(tween)
             end 
             wait(0.01)
             repeat wait()
-                print('got to this')
                 nogp = false
                 nokeys = false
                 task.spawn(function()
@@ -702,10 +839,12 @@ spawn(function()
                     if not checkForMobs() then break end 
                 end 
                 _G.autoswing = false
-                char.HumanoidRootPart.CFrame = ws:FindFirstChild("HalloweenTower").EndModule.Parts.FinalBossSpawn.CFrame
+                char.HumanoidRootPart.CFrame = ws:FindFirstChild("HalloweenTower").EndModule.Parts.GateBlock.CFrame
                 getChests(st.tweenchest)
                 wait(0.5)
                 AutoDrop()
+                wait(0.1)
+                char.HumanoidRootPart.CFrame = ws:FindFirstChild("HalloweenTower").EndModule.Parts.FinalBossSpawn.CFrame
                 wait(0.5)
                 AutoEquip(true,false)
                 if ws:FindFirstChild("HalloweenTower") ~= nil then
@@ -749,20 +888,31 @@ spawn(function()
                     table.insert(playerInfo,v.Name..": "..v:FindFirstChild("Amount").Text:gsub("x",""))
                 end
             end
+            string = readfile("finalfarm/"..plr.Name.."/newswordids.txt")
             for i,v in pairs(plr.Backpack:GetChildren()) do 
                 if v:FindFirstChild("Config") and v.Config:FindFirstChild("Rarity") and v.Config:FindFirstChild("Mold") and v.Config:FindFirstChild("Cracked") and v.Config:FindFirstChild("ITEMID") and v.Config:FindFirstChild("Class") then 
                     if v.Config.ITEMID.Value ~= st.chestid and v.Config.ITEMID.Value ~= st.farmid then 
                         if v.Config.Mold.Value >= st.mold and v.Config.Cracked.Value == true or v.Config.Rarity.Value >= st.rarity then 
                             if v.Config.Class.Value > 0 then 
                                 v.Config.Class.Value = 0
-                                table.insert(swordInfo,"Rarity: "..rs.Rarities[v.Config.Rarity.Value].RarityName.Value.." | ".."Quality: "..rs.Qualities[v.Config.Quality.Value].QualityName.Value.." | ".."Mold: "..rs.AllMolds[v.Config.Mold.Value].MoldName.Value.." | ".."Cracked: "..tostring(v.Config.Cracked.Value))
+                                if not string:find(tostring(v.Config.ITEMID.Value)) then
+                                    appendfile("finalfarm/"..plr.Name.."/newswordids.txt",tostring(v.Config.ITEMID.Value)..",")
+                                    table.insert(swordInfo,"Rarity: "..rs.Rarities[v.Config.Rarity.Value].RarityName.Value.." | ".."Quality: "..rs.Qualities[v.Config.Quality.Value].QualityName.Value.." | ".."Mold: "..rs.AllMolds[v.Config.Mold.Value].MoldName.Value.." | ".."Cracked: "..tostring(v.Config.Cracked.Value))
+                                end
                             end
                         end
                     end
                 end
             end 
-            if #swordInfo == 0 then 
+            if #swordInfo == 0 then
+                a = ""
                 table.insert(swordInfo,"No New Swords")
+            else
+                if st.pingifnewsword then
+                    a = "@everyone"
+                else
+                    a = ""
+                end
             end
             totalGems = 0
             totalImps = 0
@@ -780,7 +930,7 @@ spawn(function()
             table.insert(allAccountInfo,"Impossibles Accross All Accounts: "..totalImps)
             local data =
             {
-            ["content"] = "<@"..st.id..">",
+            ["content"] = a,
             ["embeds"] = {{
                 ["title"] = "OwO :blush: :pleading_face:",
                 ["description"] = "",

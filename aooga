@@ -256,8 +256,14 @@ function findHighestGiftByType(Type,Folder,InfoOnly)
         table.insert(findHighestTable,"ID: "..i..Type..": "..v.Config[Type])
     end 
 
-    nums = {}
-    for i,v pairs(findHighestTabl)
+    high = 0 
+    for i,v in pairs(findHighestTable) do 
+        es = v:match(Type.."%p%s(%d+)")
+        if tonumber(es) > high and tonumber(es) < 500 then 
+            high = tonumber(es)
+            claim = v:match("ID%p%s(%d+)")
+        end
+    end
     if not InfoOnly then
         game:GetService("ReplicatedStorage").Framework.RemoteEvent:FireServer(0,"ProductHandler","AcceptGift",{claim})
     end
@@ -279,15 +285,10 @@ settings:AddDropdown('gifts',{
     Tooltip = "pressing hte claim button will find the highest of what you select here"
 })
 settings:AddButton('Gift Amount (Accurate)',function()
-    giftamt = 0
     decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
-    for _,v in pairs(decoded) do 
-        giftamt = giftamt+1
-    end
-    wait(0.1)
     game.StarterGui:SetCore("SendNotification",{
         Title = "Checking...",
-        Text = tostring(giftamt),
+        Text = tostring(#decoded),
     })
 end)
 Options.gifts:OnChanged(function() 

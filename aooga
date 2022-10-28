@@ -77,6 +77,7 @@ local Tabs = {
     -- Creates a new tab titled Main
     Main = Window:AddTab('Main'),
     Web = Window:AddTab("Webhook"),
+    Ench = Window:AddTab("Re-Enchanter"),
     Gift = Window:AddTab("Gifts"),
     Boost = Window:AddTab("Boosts"),
     Set = Window:AddTab("Settings"),
@@ -247,6 +248,100 @@ end)
 Toggles.sendweb:OnChanged(function()
     st.sendwebhook = Toggles.sendweb.Value
 end)   
+
+
+
+
+
+--[[ start of re enchanter tab!!!!]]--
+run = game:GetService("RunService")
+tolock = {}
+toget = {}
+est = Tabs.Ench:AddRightGroupbox("Settings")
+et = Tabs.Ench:AddLeftGroupbox("Toggles")
+-- ENCAHNT TOGGLES SECTION 
+et:AddToggle('enchant',{
+    Text = "Start Re-Encahnting",
+    Default = false,
+    Tooltip = "This will start re enchanting :scream: "
+})
+Toggles.enchant:OnChanged(function()
+    enchanttoggle = Toggles.enchant.Value
+end)
+-- ENCHANT SETTINGS SECTION
+est:AddDropdown('enchmode',{
+    Values = {'One Enchant','Two Enchants','Multiple Enchants'},
+    Default = 1,
+    Multi = false, 
+    Text = "Select enchant mode",
+    Tooltip = "Enchant mode (see yt video for more info)",
+})
+est:AddDivider()
+est:AddDivider()
+Options.enchmode:OnChanged(function()
+    mode = tostring(Options.enchmode.Value)
+end)
+est:AddDropdown('lock',{
+    Values = EnchantTable,
+    Default = 1,
+    Multi = true,
+    Text = 'Select Enchants (Lock)',
+    Tooltip = 'ONLY USE THIS FOR TWO AND MULTIPLE ENCHANTS'
+})
+est:AddButton('Check Enchants (Lock)',function()
+    warn(table.concat(tolock,"\n"))
+end)
+est:AddButton('Clear Selected Lock',function()
+    tolock = {}
+    for i,v in pairs(EnchantTable) do 
+        task.wait()
+        Options.lock:SetValue({
+            v = false,
+        })
+    end
+end)
+-- get enchant section
+est:AddDivider()
+est:AddDivider()
+
+est:AddDropdown('get',{
+    Values = EnchantTable, 
+    Default = 1,
+    Multi = true,
+    Text = "Select Enchant (Get)",
+    Tooltip = "Use this dropdown for one enchant and the enchant after you get the selected lock one",
+})
+est:AddButton('Check Enchants (Get)',function()
+    warn(table.concat(toget,"\n"))
+end)   
+est:AddButton("Clear Selected Get",function()
+    toget = {}
+    for i,v in pairs(EnchantTable) do 
+        task.wait()
+        Options.get:SetValue({
+            v = false,
+        })
+    end
+end)
+Options.lock:OnChanged(function()
+    tolock = {}
+    for i,v in pairs(Options.lock.Value) do 
+        table.insert(tolock,i)
+    end
+end)
+Options.get:OnChanged(function()
+    toget = {}
+    for i,v in pairs(Options.get.Value) do 
+        table.insert(toget,i)
+    end
+end)
+
+--[[end of re enchanter tab!!!!]]--
+
+
+
+
+
 --[[ start of gifts tab]]--
 
 function findHighestGiftByType(Type,Folder,InfoOnly)
@@ -286,9 +381,14 @@ settings:AddDropdown('gifts',{
 })
 settings:AddButton('Gift Amount (Accurate)',function()
     decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
+    gifts = 0
+    for i,v in pairs(decoded) do 
+        gifts = gifts+1
+    end
+    wait(0.1)
     game.StarterGui:SetCore("SendNotification",{
         Title = "Checking...",
-        Text = tostring(#decoded),
+        Text = tostring(gifts),
     })
 end)
 Options.gifts:OnChanged(function() 
@@ -465,13 +565,13 @@ function AutoDrop()
     wait(0.2) -- wait a lil bit
     for i,v in pairs(plr.Backpack:GetChildren()) do -- loop through backpack
         if v:FindFirstChild("Config") and v.Config:FindFirstChild("Rarity") and v.Config:FindFirstChild("ITEMID") and v.Config:FindFirstChild("Mold") and v.Config:FindFirstChild("Cracked") then 
-            if v.Config.Mold.Value >= st.mold and v.Config.Cracked.value == true then 
-            else 
-                if v.Config.Rarity.Value < st.rarity then 
-                    if v.Config.ITEMID.Value ~= st.farmid and v.Config.ITEMID.Value ~= st.chestid then 
-                        if not Chestfinder(v.Config) then 
-                            char.Humanoid:EquipTool(v)
-                            rs.Framework.RemoteEvent:FireServer(0,"BackpackServer","Drop",{})
+            if v.Config.Mold.Value >= st.mold and v.Config.Cracked.value == true then -- if  mold is above selected mold and is cracked then
+            else  -- if its not then
+                if v.Config.Rarity.Value < st.rarity then -- if swords rarity is less than rarity filter
+                    if v.Config.ITEMID.Value ~= st.farmid and v.Config.ITEMID.Value ~= st.chestid then -- and its not a farm sword then
+                        if not Chestfinder(v.Config) then  -- if it doesnt have chestfinder+ then
+                            char.Humanoid:EquipTool(v) -- equip sword
+                            rs.Framework.RemoteEvent:FireServer(0,"BackpackServer","Drop",{}) -- drop sword
                         end 
                     end
                 end
@@ -1007,3 +1107,185 @@ spawn(function()
         end
     end
 end)
+-- auto enchanter rewritten baby
+enchanting = false
+task.spawn(function()
+    while true do wait()
+            enchanting = false
+            aei = workspace[plr.Name.."'s Base"].Enchanter.Item.Value.Config
+            if enchanttoggle and not enchanting then
+                if mode == "One Enchant" then 
+                        while enchanttoggle do wait()
+                            enchanting = true 
+                            if enchanttoggle then
+                                e1 = aei.Enchant1.Value:split('"')
+                                e2 = aei.Enchant2.Value:split('"')
+                                e3 = aei.Enchant3.Value:split('"')
+                                e4 = aei.Enchant4.Value:split('"')
+                                if table.find(toget,e1[2]) or table.find(toget,e2[2]) or table.find(toget,e3[2]) or table.find(toget,e4[2]) then 
+                                    Toggles.enchant:SetValue(false)
+                                else
+                                    if enchanttoggle then
+                                        game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","Buy",{})
+                                
+                                    end
+                                end
+                            end
+                        end
+                end 
+                if mode == "Two Enchants" then 
+                        while enchanttoggle do wait()
+                            if enchanttoggle then
+                                enchanting = true 
+                                locked = false
+                                repeat wait() 
+                                    e1 = aei.Enchant1.Value:split('"')
+                                    e2 = aei.Enchant2.Value:split('"')
+                                    e3 = aei.Enchant3.Value:split('"')
+                                    e4 = aei.Enchant4.Value:split('"')
+                                    if table.find(tolock,e1[2]) then 
+                                        locked = true 
+                                        lock = 1 
+                                    end
+                                    if table.find(tolock,e2[2]) then 
+                                        locked = true
+                                        lock = 2
+                                    end 
+                                    if table.find(tolock,e3[2]) then 
+                                        locked = true 
+                                        lock = 3 
+                                    end
+                                    if table.find(tolock,e4[2]) then 
+                                        locked = true 
+                                        lock = 4 
+                                    end
+                                    if not locked then 
+                                        game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","Buy",{})
+                                    end
+                                until locked == true or not enchanttoggle 
+                            end
+                            if enchanttoggle then
+                            counter = 0 
+                            run = game:GetService("RunService")
+                            local connection
+                            function buyLocks()
+                                if counter >= 50 then 
+                                    connection:Disconnect()
+                                else
+                                    counter = counter+1
+                                    game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","BuyLock",{}) 
+                                end 
+                            end
+                            connection = run.Heartbeat:Connect(buyLocks)
+                            wait(0.1)
+                            game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
+                            -- apply lock remote 
+                            gotten = false
+                            repeat wait()
+                                e1 = aei.Enchant1.Value:split('"')
+                                e2 = aei.Enchant2.Value:split('"')
+                                e3 = aei.Enchant3.Value:split('"')
+                                e4 = aei.Enchant4.Value:split('"')
+                                if table.find(toget,e1[2]) then 
+                                    gotten = true 
+                                end
+                                if table.find(toget,e2[2]) then 
+                                    gotten = true 
+                                end
+                                if table.find(toget,e3[2]) then 
+                                    gotten = true 
+                                end
+                                if table.find(toget,e4[2]) then 
+                                    gotten = true 
+                                end
+                                if not gotten and aei.EnchantLock.Value ~= "[]" then 
+                                    rs.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","Buy",{})
+                                end
+                            until gotten or aei.EnchantLock.Value == "[]" or not enchanttoggle
+                            if gotten then Toggles.enchant:SetValue(false) end
+                        end
+                        end
+                    
+                end
+                if mode == "Multiple Enchants" then
+                    locked = false
+                        while enchanttoggle do wait()
+                                enchanting = true 
+                                if enchanttoggle then
+                                    repeat wait() 
+                                        e1 = aei.Enchant1.Value:split('"')
+                                        e2 = aei.Enchant2.Value:split('"')
+                                        e3 = aei.Enchant3.Value:split('"')
+                                        e4 = aei.Enchant4.Value:split('"')
+                                        if table.find(tolock,e1[2]) then 
+                                            locked = true 
+                                            lock = 1 
+                                        end
+                                        if table.find(tolock,e2[2]) then 
+                                            locked = true
+                                            lock = 2
+                                        end 
+                                        if table.find(tolock,e3[2]) then 
+                                            locked = true 
+                                            lock = 3 
+                                        end
+                                        if table.find(tolock,e4[2]) then 
+                                            locked = true 
+                                            lock = 4 
+                                        end
+                                        if not locked then 
+                                            game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","Buy",{})
+                                        end
+                                    until locked == true or not enchanttoggle
+                                end 
+                            if enchanttoggle then
+                                counter = 0 
+                                run = game:GetService("RunService")
+                                local connection
+                                function buyLocks()
+                                    if counter >= 50 then 
+                                        connection:Disconnect()
+                                    else
+                                        counter = counter+1
+                                        game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","BuyLock",{}) 
+                                    end 
+                                end
+                                connection = run.Heartbeat:Connect(buyLocks)
+                                wait(0.1)
+                                game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
+                                -- apply lock remote 
+                                gotten = false
+                                repeat wait()
+                                    matches = 0
+                                    e1 = aei.Enchant1.Value:split('"')
+                                    e2 = aei.Enchant2.Value:split('"')
+                                    e3 = aei.Enchant3.Value:split('"')
+                                    e4 = aei.Enchant4.Value:split('"')
+                                    if table.find(toget,e1[2]) then 
+                                        matches = matches+1
+                                    end
+                                    if table.find(toget,e2[2]) then 
+                                        matches = matches+1
+                                    end
+                                    if table.find(toget,e3[2]) then 
+                                        matches = matches+1
+                                    end
+                                    if table.find(toget,e4[2]) then 
+                                        matches = matches+1
+                                    end
+                                    if matches == #toget then 
+                                        gotten = true 
+                                    end
+                                    if not gotten and aei.EnchantLock.Value ~= "[]" then 
+                                        rs.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","Buy",{})
+                                    end
+                                until gotten or aei.EnchantLock.Value == "[]" or not enchanttoggle
+                                if gotten then Toggles.enchant:SetValue(false) end
+                            end
+                            end
+                        
+                end
+            end
+    end
+end)
+

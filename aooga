@@ -261,7 +261,7 @@ est = Tabs.Ench:AddRightGroupbox("Settings")
 et = Tabs.Ench:AddLeftGroupbox("Toggles")
 -- ENCAHNT TOGGLES SECTION 
 et:AddToggle('enchant',{
-    Text = "Start Re-Enchanting",
+    Text = "Start Re-Encahnting",
     Default = false,
     Tooltip = "This will start re enchanting :scream: "
 })
@@ -1111,6 +1111,7 @@ end)
 enchanting = false
 task.spawn(function()
     while true do wait()
+        pcall(function()
             enchanting = false
             aei = workspace[plr.Name.."'s Base"].Enchanter.Item.Value.Config
             if enchanttoggle and not enchanting then
@@ -1286,6 +1287,7 @@ task.spawn(function()
                         
                 end
             end
+        end)
     end
 end)
 

@@ -261,7 +261,7 @@ est = Tabs.Ench:AddRightGroupbox("Settings")
 et = Tabs.Ench:AddLeftGroupbox("Toggles")
 -- ENCAHNT TOGGLES SECTION 
 et:AddToggle('enchant',{
-    Text = "Start Re-Encahnting",
+    Text = "Start Re-Enchanting",
     Default = false,
     Tooltip = "This will start re enchanting :scream: "
 })

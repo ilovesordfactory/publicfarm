@@ -1178,7 +1178,7 @@ task.spawn(function()
                                 end 
                             end
                             connection = run.Heartbeat:Connect(buyLocks)
-                            wait(0.1)
+                            wait(0.25)
                             game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
                             -- apply lock remote 
                             gotten = false
@@ -1252,7 +1252,7 @@ task.spawn(function()
                                     end 
                                 end
                                 connection = run.Heartbeat:Connect(buyLocks)
-                                wait(0.1)
+                                wait(0.25)
                                 game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
                                 -- apply lock remote 
                                 gotten = false

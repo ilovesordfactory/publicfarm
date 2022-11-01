@@ -149,6 +149,7 @@ registerchest = settings:AddButton("Register Chest Sword",function()
         })
     end 
 end)
+settings:AddDivider()
 settings:AddSlider("tspeed",{
     Text = "Tween Speed",
     Default = st.savedspeed,
@@ -379,6 +380,7 @@ settings:AddDropdown('gifts',{
     Text = "Find Highest: ",
     Tooltip = "pressing hte claim button will find the highest of what you select here"
 })
+settings:AddDivider()
 settings:AddButton('Gift Amount (Accurate)',function()
     decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
     gifts = 0
@@ -409,10 +411,11 @@ claim:AddButton('Get Highest Info',function()
         Text = findHighestGiftByType(tostring(selectedtype),tostring(selectedfolder),true),
     })
 end)
-
+claim:AddDivider()
 claim:AddButton('Claim',function()
     findHighestGiftByType(tostring(selectedtype),tostring(selectedfolder),false)
 end)
+claim:AddDivider()
 claim:AddButton("Claim All (Stand still)",function()
     decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
     for i,v in pairs(decoded) do 
@@ -421,10 +424,17 @@ claim:AddButton("Claim All (Stand still)",function()
 end)
 --[[ end of webhook tab]]--
 --[[ start of boost tab]]--
+boostTab = {}
+for i,v in pairs(plr.PlayerGui.MainGui.TopHolder.BoostsHolder:GetChildren()) do 
+    if v:IsA("TextLabel") then 
+        subbed = v.Name:gsub("Boost","")
+        table.insert(boostTab,tostring(subbed))
+    end
+end
 boostset = Tabs.Boost:AddRightGroupbox("Boosts")
 boosttogsec = Tabs.Boost:AddLeftGroupbox("Buttons")
 boostset:AddDropdown('boost',{
-    Values = {"Cash","Damage","Luck","Souls","EXP","UltraLuck"},
+    Values = boostTab,
     Default = 1,
     Multi = false,
     Text = 'select boost to buy',
@@ -459,6 +469,7 @@ boosttogsec:AddButton('Buy',function()
     end
     connection = runservice.Heartbeat:Connect(Buy)
 end)
+boosttogsec:AddDivider()
 boosttogsec:AddButton('Use',function()
     runservice = game:GetService("RunService")
     local connection 
@@ -512,6 +523,7 @@ end)
 config:AddButton('Save Config',function()
     writefile('finalfarm/'..plr.Name.."/dungeonsettings.txt",hs:JSONEncode(st))
 end)
+config:AddDivider()
 config:AddButton('Reset Current Config',function()
     st = {
         farmid = "",
@@ -1178,7 +1190,7 @@ task.spawn(function()
                                 end 
                             end
                             connection = run.Heartbeat:Connect(buyLocks)
-                            wait(0.25)
+                            wait(0.1)
                             game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
                             -- apply lock remote 
                             gotten = false
@@ -1252,7 +1264,7 @@ task.spawn(function()
                                     end 
                                 end
                                 connection = run.Heartbeat:Connect(buyLocks)
-                                wait(0.25)
+                                wait(0.1)
                                 game.ReplicatedStorage.Framework.RemoteFunction:InvokeServer(0,"EnchanterServer","ApplyLocks",{lock,50})
                                 -- apply lock remote 
                                 gotten = false

@@ -417,6 +417,15 @@ claim:AddButton('Claim',function()
     findHighestGiftByType(tostring(selectedtype),tostring(selectedfolder),false)
 end)
 claim:AddDivider()
+claim:AddButton("Claim Cracked",function()
+    decodedgifts = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value) 
+    for i,v in pairs(decodedgifts) do 
+        if v.Config.Cracked == true then 
+            game:GetService("ReplicatedStorage").Framework.RemoteEvent:FireServer(0,"ProductHandler","AcceptGift",{tostring(i)})
+        end
+    end
+end)
+claim:AddDivider()
 claim:AddButton("Claim All (Stand still)",function()
     decoded = hs:JSONDecode(rs.Data[plr.Name].Stats.CurrentGifts.Value)
     for i,v in pairs(decoded) do 
@@ -1318,4 +1327,3 @@ task.spawn(function()
         end)
     end
 end)
-

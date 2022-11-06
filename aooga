@@ -155,7 +155,7 @@ settings:AddSlider("tspeed",{
     Text = "Tween Speed",
     Default = st.savedspeed,
     Min = 1,
-    Max = 150,
+    Max = 1000,
     Rounding = 0
 })
 

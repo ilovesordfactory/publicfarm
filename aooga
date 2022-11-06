@@ -991,8 +991,7 @@ spawn(function()
     while true do wait()
         if st.sendwebhook and dungeonDone then 
             gained = plr.PlayerGui.MainGui.TopHolder.Gems.Price.Text:gsub("%p","")-GemsOnExecution
-            currentc = plr.PlayerGui.MainGui.Shop.Holder.Candy.CandyAmount.Amount.Text
-            cgained = currentc-CandyOnExecution
+            cgained = tonumber(plr.PlayerGui.MainGui.Shop.Holder.Candy.CandyAmount.Amount.Text-CandyOnExecution)
             playerInfo = {}
             dungeonInfo = {}
             swordInfo = {}

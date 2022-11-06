@@ -571,6 +571,7 @@ function checkTimeApart(startedtime,glort)
         return true 
     end
 end
+dropping = false 
 function AutoDrop()
     dropping = true
     char.Humanoid:UnequipTools() -- make sure every sword is in backpackw
@@ -752,7 +753,10 @@ function getChests(tween)
                         nokeys = true 
                     end
                 end 
+                _G.autoswing = true 
                 Tween(tr.Effect,1.5,0,0)
+                _G.autoswing = false 
+                wait(0.1)
                 if tr:FindFirstChildWhichIsA("ProximityPrompt",true) then 
                     fireproximityprompt(tr:FindFirstChildWhichIsA("ProximityPrompt",true),100)
                 end
@@ -857,9 +861,11 @@ spawn(function()
                         if ws:FindFirstChild("HalloweenTower") == nil then 
                             if ws.Maps.Graveyard.Brick.BillboardGui.Counter.Visible == false then
                                 if (char.HumanoidRootPart.Position-ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad.Position).Magnitude >= 35 then
+                                    _G.autoswing = true
                                     Tween(ws.Maps.Graveyard.DungeonMatchmaking.MatchmakingPad,0,5,0)
                                 else 
                                     ws.Gravity = 198 -- set gravity back to normal when near pad 
+                                    _G.autoswing = false
                                 end
                             end
                         end
@@ -957,7 +963,10 @@ spawn(function()
                 if ws:FindFirstChild("HalloweenTower") ~= nil then
                     for i,v in pairs(ws:FindFirstChild("HalloweenTower").EndModule.Parts.Stands:GetChildren()) do 
                         if v:FindFirstChildWhichIsA("TextLabel",true).Text == plr.Name then 
+                            _G.autoswing = true
                             Tween(v:FindFirstChild("Pad",true),0,1.5,0)
+                            wait(0.1)
+                            _G.autoswing = false
                         end
                     end
                 end 
@@ -968,7 +977,7 @@ spawn(function()
                 wait(0.1)
                 dungeonDone = false
                 rs.Framework.RemoteEvent:FireServer(0,"UIServer","Teleport",{})
-                repeat wait() until ws:FindFirstChild("HalloweenTower") == nil
+                repeat wait() until workspace:FindFirstChild("HalloweenTower") == nil
                 breaktimer = true
             end)
         end
@@ -976,10 +985,12 @@ spawn(function()
 end)
 plrdata = rs.Data[plr.Name]
 GemsOnExecution = plr.PlayerGui.MainGui.TopHolder.Gems.Price.Text:gsub("%p","")
+CandyOnExecution = plr.PlayerGui.MainGui.Shop.Holder.Candy.CandyAmount.Amount.Text
 spawn(function()
     while true do wait()
         if st.sendwebhook and dungeonDone then 
             gained = plr.PlayerGui.MainGui.TopHolder.Gems.Price.Text:gsub("%p","")-GemsOnExecution
+            cgained = tonumber(plr.PlayerGui.MainGui.Shop.Holder.Candy.CandyAmount.Amount.Text-CandyOnExecution)
             playerInfo = {}
             dungeonInfo = {}
             swordInfo = {}
@@ -987,6 +998,8 @@ spawn(function()
             table.insert(playerInfo,"Username: "..plr.Name)
             table.insert(playerInfo,"Gems: "..plr.PlayerGui.MainGui.TopHolder.Gems.Price.Text)
             table.insert(playerInfo,"Gems Gained: +"..Comma(gained))
+            table.insert(playerInfo,"Candy: "..plr.PlayerGui.MainGui.Shop.Holder.Candy.CandyAmount.Amount.Text)
+            table.insert(playerInfo,"Candy Gained:  +"..cgained)
             table.insert(dungeonInfo,"Last Dungeon Run Time: "..plrdata.Stats.FastestDungeonRun.Value/1000)
             table.insert(dungeonInfo,"Total Dungeons Completed: "..plrdata.Stats.DungeonsCompleted.Value)
             table.insert(playerInfo,"------\nArtifacts:\n------")
@@ -1107,14 +1120,16 @@ spawn(function()
     while true do wait()
         if _G.autoswing then
             pcall(function()
-                if char:FindFirstChild("Sword") then 
-                    char.Sword:Activate()
-                    if char.Sword.Config.ITEMID.Value ~= st.farmid then 
+                if not dropping then
+                    if char:FindFirstChild("Sword") then 
+                        char.Sword:Activate()
+                        if char.Sword.Config.ITEMID.Value ~= st.farmid then 
+                            AutoEquip(true,false)
+                        end 
+                    else
                         AutoEquip(true,false)
                     end 
-                else
-                    AutoEquip(true,false)
-                end 
+                end
             end)
         end
     end
